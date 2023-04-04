@@ -36,3 +36,42 @@
     transform: rotate(360deg);
   }
 }
+
+.square {
+  display: flex;
+  width: 100px;
+  height: 100px;
+  background-color: red;
+}
+
+.circle {
+  display: flex;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border-style: dotted;
+
+}
+
+.a-question {
+}
+
+.not-opened {
+  background-color: gray;
+}
+.a-truth {
+  background-color: green;
+}
+.a-lie {
+  background-color: red;
+}
+
+.text {
+  margin: auto;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
