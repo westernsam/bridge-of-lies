@@ -25,7 +25,7 @@ const Circle = ({isALie, question, status, onTruth, onLie}: CircleProps) => {
         text: status === 'start' ? 'start' : '?'
     })
 
-    useEffect(() =>  {
+    useEffect(() => {
         switch (status) {
             case 'question_revealed': {
                 setState({status: 'question_revealed', text: question, colour: 'a-question'})
@@ -41,131 +41,89 @@ const Circle = ({isALie, question, status, onTruth, onLie}: CircleProps) => {
                 break;
             }
             case 'question_revealed': {
-                isALie ? onLie() :  onTruth()
+                isALie ? onLie() : onTruth()
                 setState({status: 'result_revealed', text: question, colour: isALie ? 'a-lie' : 'a-truth'})
                 break;
             }
         }
     }
 
-    return <div className={`circle ${state.colour}`} onClick={clickCircle}><p className="text">{state.text}</p></div>
+    return <div key={question} className={`circle ${state.colour}`} onClick={clickCircle}><p
+        className="text">{state.text}</p></div>
+}
+
+function buildBridge(revealNeighboursOf: (index) => () => void, rowStatus: CircleStatus[][], truths: string[], lies: string[]) {
+
+    function createStep(x: number, y: number, text: string, isALie: boolean) {
+        return Circle({
+            isALie: isALie,
+            question: text,
+            status: rowStatus[x][y],
+            onLie: () => {
+            },
+            onTruth: revealNeighboursOf([x, y])
+        });
+    }
+
+    return [
+        [
+            createStep(0, 0, 'start', false)
+        ],
+        [
+            createStep(1, 0, 'mo salah', false),
+            createStep(1, 1, 'billy sharp', true),
+        ],
+        [
+            createStep(2, 0, 'andy robertson', false),
+            createStep(2, 1, 'virgil van dyke', false),
+            createStep(2, 2, 'lionel messi', true),
+        ],
+        [
+            createStep(3, 0, 'divok origi', false),
+            createStep(3, 1, 'Rhiad marez', true),
+            createStep(3, 2, 'Harry Kane', true),
+            createStep(3, 3, 'Joe Gomez', false),
+        ]
+    ];
 }
 
 function App() {
-    const [rowStatus, setState] = useState<CircleStatus[][]>( [
+    const [rowStatus, setState] = useState<CircleStatus[][]>([
+        ['start'],
         ['not_yet_revealed', 'not_yet_revealed'],
         ['not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed'],
-        ['not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed',  'not_yet_revealed' ]
+        ['not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed'],
+        ['not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed'],
+        ['not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed'],
+        ['not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed'],
+        ['not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed'],
+        ['not_yet_revealed', 'not_yet_revealed', 'not_yet_revealed'],
+        ['not_yet_revealed', 'not_yet_revealed']
     ])
 
-    const start = [
-        Circle({
-            isALie: false, question: "start", status: 'start', onLie: () => {}, onTruth: () => {
-                rowStatus[0][0] = 'question_revealed'
-                rowStatus[0][1] = 'question_revealed'
-                setState(rowStatus)
-            }
-        })
-    ]
+    const revealNeighboursOf = index => () => {
+        const [row, column] = index
 
-    const firstRow = [
-        Circle({
-            isALie: false,
-            question: "mo salah",
-            status: rowStatus[0][0],
-            onLie: () => {},
-            onTruth: () => {
-                rowStatus[1][0] = 'question_revealed'
-                rowStatus[1][1] = 'question_revealed'
-                setState(rowStatus)
-            }
-        }),
-        Circle({
-            isALie: true,
-            question: "billy sharp",
-            status: rowStatus[0][1],
-            onLie: () => {},
-            onTruth: () => {
-                rowStatus[1][1] = 'question_revealed'
-                rowStatus[1][2] = 'question_revealed'
-                setState(rowStatus)
+        function setIfPresent(x, y) {
+            if (x > 0 && x < rowStatus.length && y >= 0 && y < rowStatus[x].length)
+                rowStatus[x][y] = 'question_revealed'
+        }
 
-            }
-        })]
+        setIfPresent(row - 1, column)
+        setIfPresent(row - 1, column + 1)
+        setIfPresent(row, column - 1)
+        setIfPresent(row, column + 1)
+        setIfPresent(row + 1, column)
+        setIfPresent(row + 1, column + 1)
 
-    const secondRow = [
-        Circle({
-            isALie: false,
-            question: "andy robertson",
-            status: rowStatus[1][0],
-            onLie: () => {},
-            onTruth: () => {}
-        }),
-        Circle({
-            isALie: false,
-            question: "virgil van dyke",
-            status: rowStatus[1][1],
-            onLie: () => {},
-            onTruth: () => {
-                rowStatus[1][0] = 'question_revealed'
-                rowStatus[1][2] = 'question_revealed'
-                setState(rowStatus)
-            }
-        }),
-        Circle({
-            isALie: true,
-            question: "lionel messi",
-            status: rowStatus[1][2],
-            onLie: () => {},
-            onTruth: () => {}
-        })]
-
-    const thirdRow = [
-        Circle({
-            isALie: false,
-            question: "",
-            status: rowStatus[2][0],
-            onLie: () => {},
-            onTruth: () => {}
-        }),
-        Circle({
-            isALie: false,
-            question: "virgil van dyke",
-            status: rowStatus[2][1],
-            onLie: () => {},
-            onTruth: () => { }
-        }),
-        Circle({
-            isALie: true,
-            question: "lionel messi",
-            onLie: () => {},
-            status: rowStatus[2][2],
-            onTruth: () => {}
-        }),
-        Circle({
-            isALie: true,
-            question: "lionel messi",
-            onLie: () => {},
-            status: rowStatus[2][3],
-            onTruth: () => {}
-        })
-    ]
+        setState(rowStatus)
+    }
+    const bridge = buildBridge(revealNeighboursOf, rowStatus, [], []);
 
     return (
         <div className="App">
             <h1>Bridge of lies: current Liverpool players</h1>
-            <div className="row">
-                {start}
-            </div>
-            <div className="row">
-                {firstRow}
-            </div>
-            <div className="row">
-                {secondRow}
-            </div>
-            <div className="row">
-                {thirdRow}
-            </div>
+            {bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)}
         </div>
     );
 }
