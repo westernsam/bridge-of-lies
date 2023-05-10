@@ -1,138 +1,52 @@
 import './App.css';
-import {useEffect, useState} from "react";
+import {useState} from "react";
 
 interface CircleProps {
     isALie: boolean
     question: string
-    status?: CircleStatus
-    onTruth: () => void;
-    onLie: () => void;
+    status: CircleStatus[][]
+    onTruth: (row, column) => void;
+    onLie: (row, column) => void;
+    x: number
+    y: number
 }
 
 type CircleStatus = 'start' | 'not_yet_revealed' | 'question_revealed' | 'result_revealed' | 'safety' | 'end'
 type CircleColour = 'not-opened' | 'a-truth' | 'a-lie' | 'a-question'
 
-interface CircleState {
-    status: CircleStatus
-    colour: CircleColour
-    text: string
-}
-
-const Step = ({isALie, question, status, onTruth, onLie}: CircleProps) => {
+const Step = ({isALie, question, status, onTruth, onLie, x, y}: CircleProps) => {
     function getText() {
-        switch(status) {
+        switch(status[x][y]) {
             case 'start': return 'start'
             case 'end': return 'end'
             case 'safety': return 'safety'
+            case 'question_revealed': return question
+            case 'result_revealed': return question
             default: return '?'
         }
     }
-
-    const [state, setState] = useState<CircleState>({
-        status: status ?? 'not_yet_revealed',
-        colour: 'not-opened',
-        text: getText()
-    })
-
-    useEffect(() => {
-        switch (status) {
-            case 'question_revealed': {
-                setState({status: 'question_revealed', text: question, colour: 'a-question'})
-            }
+    function getColour(): CircleColour {
+        switch(status[x][y]) {
+            case 'result_revealed': return isALie ? 'a-lie' : 'a-truth'
+            case 'question_revealed': return 'a-question'
+            default: return 'not-opened'
         }
-    }, [status])
-
+    }
     const clickStep = () => {
-        switch (state.status) {
+        switch (status[x][y]) {
             case 'start': {
-                setState({status: 'result_revealed', text: question, colour: 'a-question'})
-                onTruth()
+                onTruth(x, y)
                 break;
             }
             case 'question_revealed': {
-                isALie ? onLie() : onTruth()
-                setState({status: 'result_revealed', text: question, colour: isALie ? 'a-lie' : 'a-truth'})
+                isALie ? onLie(x, y) : onTruth(x, y)
                 break;
             }
         }
     }
 
-    return <div key={question} className={`circle ${state.colour}`} onClick={clickStep}><p
-        className="text">{state.text}</p></div>
-}
-
-function buildBridge(revealNeighboursOf: (index) => () => void, rowStatus: CircleStatus[][], truths: string[], lies: string[]) {
-
-    function createStep(x: number, y: number, text: string, isALie: boolean) {
-        return Step({
-            isALie: isALie,
-            question: text,
-            status: rowStatus[x][y],
-            onLie: () => { },
-            onTruth: revealNeighboursOf([x, y])
-        });
-    }
-
-    return [
-        [
-            createStep(0, 0, 'start', false)
-        ],
-        [
-            createStep(1, 0, 'mo salah', false),
-            createStep(1, 1, 'billy sharp', false),
-        ],
-        [
-            createStep(2, 0, 'andy robertson', false),
-            createStep(2, 1, 'virgil van dyke', false),
-            createStep(2, 2, 'lionel messi', false),
-        ],
-        [
-            createStep(3, 0, 'divok origi', false),
-            createStep(3, 1, 'Rhiad marez', false),
-            createStep(3, 2, 'Harry Kane', false),
-            createStep(3, 3, 'Joe Gomez', false),
-        ],
-        [
-            createStep(4, 0, 'divok origi', false),
-            createStep(4, 1, 'divok origi', false),
-            createStep(4, 2, 'Rhiad marez', false),
-            createStep(4, 3, 'Harry Kane', false),
-            createStep(4, 4, 'Harry Kane', false),
-        ],
-        [
-            createStep(5, 0, 'safety', false),
-            createStep(5, 1, 'divok origi', false),
-            createStep(5, 2, 'Rhiad marez', false),
-            createStep(5, 3, 'Harry Kane', false),
-            createStep(5, 4, 'Harry Kane', false),
-            createStep(5, 5, 'safety', false),
-        ],
-        [
-            createStep(6, 0, 'divok origi', false),
-            createStep(6, 1, 'divok origi', false),
-            createStep(6, 2, 'Rhiad marez', false),
-            createStep(6, 3, 'Harry Kane', false),
-            createStep(6, 4, 'Harry Kane', false),
-        ],
-        [
-            createStep(7, 0, 'Rhiad marez', false),
-            createStep(7, 1, 'Rhiad marez', false),
-            createStep(7, 2, 'Harry Kane', false),
-            createStep(7, 3, 'Harry Kane', false),
-        ],
-        [
-            createStep(8, 0, 'Rhiad marez', false),
-            createStep(8, 1, 'Harry Kane', false),
-            createStep(8, 2, 'Harry Kane', false),
-        ],
-        [
-             createStep(9, 0, 'Harry Kane', false),
-            createStep(9, 1, 'Harry Kane', false),
-        ],
-        [
-            createStep(10, 0, 'end', false)
-        ],
-    ];
+    return <div key={`cell-${x}-${y}`} className={`circle ${getColour()}`} onClick={clickStep}><p
+        className="text">{getText()}</p></div>
 }
 
 function App() {
@@ -150,33 +64,169 @@ function App() {
         ['end']
     ])
 
-    const revealNeighboursOf = index => () => {
-        const [row, column] = index
+    const [truths, ] = useState<boolean[][]>(getTruthPath());
+
+    function createStep(x: number, y: number, text: string, isALie: boolean) {
+        return Step({
+            isALie: isALie,
+            question: text,
+            status: rowStatus,
+            onLie: (x, y) => {
+                const newRowState = [...rowStatus.map(r => [...r])]
+                if (newRowState[x][y] === 'question_revealed' ) {
+                    newRowState[x][y] = 'result_revealed'
+                }
+
+                setState(newRowState)
+            },
+            onTruth: revealNeighboursOf,
+            x,
+            y
+        });
+    }
+
+    const revealNeighboursOf = (row, column) => {
+        const newRowState = [...rowStatus.map(r => [...r])]
 
         function setIfPresent(x, y) {
-            if (x > 0 && x < rowStatus.length && y >= 0 && y < rowStatus[x].length && rowStatus[x][y] == 'not_yet_revealed')
-                rowStatus[x][y] = 'question_revealed'
+            if (x > 0 && x < newRowState.length && y >= 0 && y < newRowState[x].length && newRowState[x][y] === 'not_yet_revealed')
+                newRowState[x][y] = 'question_revealed'
         }
 
         function columnOffset(row1: number) {
             return row1 > 5 ? -1 : 0;
         }
 
-        setIfPresent(row - 1, column-1 +  (row - 1 < 5 ? 0 : 1))
-        setIfPresent(row - 1, column +  (row - 1 < 5 ? 0 : 1) )
+        setIfPresent(row - 1, column - 1 + (row - 1 < 5 ? 0 : 1))
+        setIfPresent(row - 1, column + (row - 1 < 5 ? 0 : 1))
         setIfPresent(row, column - 1)
         setIfPresent(row, column + 1)
-        setIfPresent(row + 1, column + columnOffset(row+1))
-        setIfPresent(row + 1, column + 1 + columnOffset(row+1))
+        setIfPresent(row + 1, column + columnOffset(row + 1))
+        setIfPresent(row + 1, column + 1 + columnOffset(row + 1))
+        if (newRowState[row][column] === 'question_revealed' ) {
+            newRowState[row][column] = 'result_revealed'
+        }
 
-        setState(rowStatus)
+        setState(newRowState)
     }
-    const bridge = buildBridge(revealNeighboursOf, rowStatus, [], []);
+
+    function buildBridge(path: boolean[][], truths: string[], lies: string[]) {
+        return path.map((row, rowIndex) => {
+            return row.map((col, colIndex) => createStep(rowIndex, colIndex, col ? 'true' : 'lie', !col))
+        })
+    }
+
+    function getTruthPath() {
+
+        var truths = 22
+        var lies = 10
+
+        function leftOrRight(row, curr, max) {
+            if (row < 5) return (curr > max) ? 0 : Math.random() > 0.5 ? 0 : 1
+            else if (curr > max) return -1
+            else return (curr < 1) ? 0 : Math.random() > 0.5 ? 0 : -1
+        }
+
+        var currentCol = leftOrRight(0, 0, 1)
+
+        function truthOrLieRow(row, numColumns) {
+            const all = [...Array(numColumns).keys()]
+            const truthY = currentCol;
+            all.splice(truthY, 1)
+
+            const restOfElements = all.map(c => {
+                if (lies === 0) {
+                    truths--
+                    return true
+                } else if (truths <= 10 - row) {
+                    lies--
+                    return false
+                } else {
+                    let rand = Math.random() > 0.4;
+                    if (rand) {
+                        truths--
+                    } else {
+                        lies--
+                    }
+                    return rand
+                }
+
+            });
+
+            truths--
+            restOfElements.splice(truthY, 0, true)
+
+            currentCol = currentCol + leftOrRight(row, currentCol, numColumns - 1)
+
+            return restOfElements
+        }
+
+        return [
+            [true],
+            truthOrLieRow(1, 2),
+            truthOrLieRow(2, 3),
+            truthOrLieRow(3, 4),
+            truthOrLieRow(4, 5),
+            [false, ...truthOrLieRow(5, 4), false],
+            truthOrLieRow(6, 5),
+            truthOrLieRow(7, 4),
+            truthOrLieRow(8, 3),
+            truthOrLieRow(9, 2),
+            [true]
+        ];
+    }
+
+
+    const bridge = buildBridge(truths,[
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+        'true',
+    ], [
+        'lie',
+        'lie',
+        'lie',
+        'lie',
+        'lie',
+        'lie',
+        'lie',
+        'lie',
+        'lie',
+        'lie',
+    ])
 
     return (
         <div className="App">
             <h1>Bridge of lies: current Liverpool players</h1>
-            {bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)}
+            {
+                bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
+            }
         </div>
     );
 }
