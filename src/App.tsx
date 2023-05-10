@@ -111,8 +111,21 @@ function App() {
     }
 
     function buildBridge(path: boolean[][], truths: string[], lies: string[]) {
+        let truth = -1
+        let lie = -1
+
         return path.map((row, rowIndex) => {
-            return row.map((col, colIndex) => createStep(rowIndex, colIndex, col ? 'true' : 'lie', !col))
+            return row.map((col, colIndex) => {
+                let text;
+
+                if (rowIndex === 0) text = 'start'
+                else if (rowIndex === 5 && colIndex ===0 ) text = 'safety'
+                else if (rowIndex === 5 && colIndex ===5 ) text = 'safety'
+                else if (rowIndex === 10 ) text = 'end'
+                else text = col ? truths[++truth] : lies[++lie]
+
+                return createStep(rowIndex, colIndex, text, !col);
+            })
         })
     }
 
@@ -178,13 +191,6 @@ function App() {
 
 
     const bridge = buildBridge(truths,[
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
         'true',
         'true',
         'true',
