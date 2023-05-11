@@ -14,6 +14,43 @@ interface CircleProps {
 type CircleStatus = 'start' | 'not_yet_revealed' | 'question_revealed' | 'result_revealed' | 'safety' | 'end'
 type CircleColour = 'not-opened' | 'a-truth' | 'a-lie' | 'a-question'
 
+const defaultTruths = [
+    'Edinborough',
+    'Durham',
+    'Berick-upon-tweed',
+    'Sheffield',
+    'York',
+    'Darlington',
+    'Leeds',
+    'Bristol Parkway',
+    'Stirling',
+    'Haymarket',
+    'Derby',
+    'Newcastle',
+    'Morpeth',
+    'Dundee',
+    'Montrose',
+    'Dunbar',
+    'Chesterfield',
+    'Wakefield Westgate',
+    'North Alterton',
+    'Totness',
+    'Almouth',
+    'Stonehaven',
+]
+const defaultLies = [
+    'Buxton',
+    'Ipswich',
+    'Cardiff',
+    'Burnley',
+    'Hartlepool',
+    'Corby',
+    'Whitby',
+    'Yeovil',
+    'Harrogate',
+    'Crediton',
+]
+
 const Step = ({isALie, question, status, onTruth, onLie, x, y}: CircleProps) => {
     function getText() {
         switch(status[x][y]) {
@@ -49,7 +86,13 @@ const Step = ({isALie, question, status, onTruth, onLie, x, y}: CircleProps) => 
         className="text">{getText()}</p></div>
 }
 
-function App() {
+interface BridgeProps {
+    truths: string[]
+    lies: string[]
+    title: string
+}
+const Bridge = ({truths, lies, title}: BridgeProps) => {
+
     const [rowStatus, setState] = useState<CircleStatus[][]>([
         ['start'],
         ['not_yet_revealed', 'not_yet_revealed'],
@@ -64,7 +107,7 @@ function App() {
         ['end']
     ])
 
-    const [truths, ] = useState<boolean[][]>(getTruthPath());
+    const [truthPath, ] = useState<boolean[][]>(getTruthPath());
 
     function createStep(x: number, y: number, text: string, isALie: boolean) {
         return Step({
@@ -148,7 +191,11 @@ function App() {
             all.splice(truthY, 1)
 
             const restOfElements = all.map(c => {
-                if (lies === 0) {
+                if (row === 9) {
+                    lies--
+                    return false
+                }
+                else if (lies === 1) {
                     truths--
                     return true
                 } else if (truths <= 10 - row) {
@@ -190,51 +237,31 @@ function App() {
     }
 
 
-    const bridge = buildBridge(truths,[
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-        'true',
-    ], [
-        'lie',
-        'lie',
-        'lie',
-        'lie',
-        'lie',
-        'lie',
-        'lie',
-        'lie',
-        'lie',
-        'lie',
-    ])
+    const bridge = buildBridge(truthPath, truths, lies)
+
 
     return (
         <div className="App">
-            <h1>Bridge of lies: current Liverpool players</h1>
+            <h1>Bridge of lies: {title}</h1>
             {
                 bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
             }
         </div>
     );
+}
+
+function App() {
+    const params = new URLSearchParams(window.location.search) // id=123
+    const truthhex = params.get('truths')
+    const lieshex = params.get('lies')
+    const titlehex = params.get('title')
+
+    const truths = !truthhex ? defaultTruths : atob(truthhex).toLocaleString().split(",");
+    const lies = !lieshex ? defaultLies : atob(lieshex).toLocaleString().split(",");
+    const title = !titlehex ? 'Stops on the route from Penzance to Aberdeen' : atob(titlehex).toLocaleString()
+
+    return Bridge({truths, lies, title})
+
 }
 
 export default App;
