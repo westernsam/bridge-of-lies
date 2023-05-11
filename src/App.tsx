@@ -29,6 +29,7 @@ const defaultTruths = [
     'Newcastle',
     'Morpeth',
     'Dundee',
+
     'Montrose',
     'Dunbar',
     'Chesterfield',
