@@ -54,22 +54,33 @@ const defaultLies = [
 
 const Step = ({isALie, question, status, onTruth, onLie, x, y}: CircleProps) => {
     function getText() {
-        switch(status[x][y]) {
-            case 'start': return 'start'
-            case 'end': return 'end'
-            case 'safety': return 'safety'
-            case 'question_revealed': return question
-            case 'result_revealed': return question
-            default: return '?'
+        switch (status[x][y]) {
+            case 'start':
+                return 'start'
+            case 'end':
+                return 'end'
+            case 'safety':
+                return 'safety'
+            case 'question_revealed':
+                return question
+            case 'result_revealed':
+                return question
+            default:
+                return '?'
         }
     }
+
     function getColour(): CircleColour {
-        switch(status[x][y]) {
-            case 'result_revealed': return isALie ? 'a-lie' : 'a-truth'
-            case 'question_revealed': return 'a-question'
-            default: return 'not-opened'
+        switch (status[x][y]) {
+            case 'result_revealed':
+                return isALie ? 'a-lie' : 'a-truth'
+            case 'question_revealed':
+                return 'a-question'
+            default:
+                return 'not-opened'
         }
     }
+
     const clickStep = () => {
         switch (status[x][y]) {
             case 'start': {
@@ -92,7 +103,14 @@ interface BridgeProps {
     lies: string[]
     title: string
 }
+
+type gamestate = 'playing' | 'won' | 'lost'
+
 const Bridge = ({truths, lies, title}: BridgeProps) => {
+
+    const [money, setMoney] = useState<number>(0)
+    const [liesSteppedOn, setLiesSteppedOn] = useState<number>(0)
+    const [gamestate, setGamestate] = useState<gamestate>('playing')
 
     const [rowStatus, setState] = useState<CircleStatus[][]>([
         ['start'],
@@ -108,7 +126,7 @@ const Bridge = ({truths, lies, title}: BridgeProps) => {
         ['end']
     ])
 
-    const [truthPath, ] = useState<boolean[][]>(getTruthPath());
+    const [truthPath,] = useState<boolean[][]>(getTruthPath());
 
     function createStep(x: number, y: number, text: string, isALie: boolean) {
         return Step({
@@ -116,41 +134,59 @@ const Bridge = ({truths, lies, title}: BridgeProps) => {
             question: text,
             status: rowStatus,
             onLie: (x, y) => {
-                const newRowState = [...rowStatus.map(r => [...r])]
-                if (newRowState[x][y] === 'question_revealed' ) {
-                    newRowState[x][y] = 'result_revealed'
+                setLiesSteppedOn(liesSteppedOn + 1)
+                if (liesSteppedOn === 2) {
+                    setMoney(0)
+                    setGamestate('lost')
                 }
+                else {
 
-                setState(newRowState)
+                    setMoney(money / 2)
+                    const newRowState = [...rowStatus.map(r => [...r])]
+                    if (newRowState[x][y] === 'question_revealed') {
+                        newRowState[x][y] = 'result_revealed'
+                    }
+
+                    setState(newRowState)
+                }
             },
-            onTruth: revealNeighboursOf,
+            onTruth: onTruth,
             x,
             y
         });
     }
 
-    const revealNeighboursOf = (row, column) => {
+    const onTruth = (row, column) => {
         const newRowState = [...rowStatus.map(r => [...r])]
 
-        function setIfPresent(x, y) {
-            if (x > 0 && x < newRowState.length && y >= 0 && y < newRowState[x].length && newRowState[x][y] === 'not_yet_revealed')
-                newRowState[x][y] = 'question_revealed'
-        }
+        if (rowStatus[row][column] === 'question_revealed')
+            setMoney(money + 100)
 
-        function columnOffset(row1: number) {
-            return row1 > 5 ? -1 : 0;
-        }
-
-        setIfPresent(row - 1, column - 1 + (row - 1 < 5 ? 0 : 1))
-        setIfPresent(row - 1, column + (row - 1 < 5 ? 0 : 1))
-        setIfPresent(row, column - 1)
-        setIfPresent(row, column + 1)
-        setIfPresent(row + 1, column + columnOffset(row + 1))
-        setIfPresent(row + 1, column + 1 + columnOffset(row + 1))
-        if (newRowState[row][column] === 'question_revealed' ) {
+        if (newRowState[row][column] === 'question_revealed') {
             newRowState[row][column] = 'result_revealed'
         }
 
+        if (row ===9) {
+            setGamestate('won')
+        } else {
+
+
+            function setIfPresent(x, y) {
+                if (x > 0 && x < newRowState.length && y >= 0 && y < newRowState[x].length && newRowState[x][y] === 'not_yet_revealed')
+                    newRowState[x][y] = 'question_revealed'
+            }
+
+            function columnOffset(row1: number) {
+                return row1 > 5 ? -1 : 0;
+            }
+
+            setIfPresent(row - 1, column - 1 + (row - 1 < 5 ? 0 : 1))
+            setIfPresent(row - 1, column + (row - 1 < 5 ? 0 : 1))
+            setIfPresent(row, column - 1)
+            setIfPresent(row, column + 1)
+            setIfPresent(row + 1, column + columnOffset(row + 1))
+            setIfPresent(row + 1, column + 1 + columnOffset(row + 1))
+        }
         setState(newRowState)
     }
 
@@ -163,9 +199,9 @@ const Bridge = ({truths, lies, title}: BridgeProps) => {
                 let text;
 
                 if (rowIndex === 0) text = 'start'
-                else if (rowIndex === 5 && colIndex ===0 ) text = 'safety'
-                else if (rowIndex === 5 && colIndex ===5 ) text = 'safety'
-                else if (rowIndex === 10 ) text = 'end'
+                else if (rowIndex === 5 && colIndex === 0) text = 'safety'
+                else if (rowIndex === 5 && colIndex === 5) text = 'safety'
+                else if (rowIndex === 10) text = 'end'
                 else text = col ? truths[++truth] : lies[++lie]
 
                 return createStep(rowIndex, colIndex, text, !col);
@@ -195,8 +231,7 @@ const Bridge = ({truths, lies, title}: BridgeProps) => {
                 if (row === 9) {
                     lies--
                     return false
-                }
-                else if (lies === 1) {
+                } else if (lies === 1) {
                     truths--
                     return true
                 } else if (truths <= 10 - row) {
@@ -241,9 +276,21 @@ const Bridge = ({truths, lies, title}: BridgeProps) => {
     const bridge = buildBridge(truthPath, truths, lies)
 
 
+    function showWinLoss() {
+        switch (gamestate) {
+            case 'won' : return <h1>You win {money}</h1>
+            case 'lost' : return  <h1>You lose !</h1>
+            default: return null
+        }
+    }
+
     return (
         <div className="App">
+            <div>
             <h1>Bridge of lies: {title}</h1>
+                <div className="square money"><h2>£ {money}</h2></div>
+                {showWinLoss()}
+            </div>
             {
                 bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
             }

@@ -37,11 +37,14 @@
   }
 }
 
+.money {
+
+}
+
 .square {
   display: flex;
   width: 100px;
   height: 100px;
-  background-color: red;
 }
 
 .circle {
@@ -52,6 +55,13 @@
   border-style: dashed;
 
 }
+
+.money {
+  justify-content: center;
+  border-style: ridge;
+  margin: auto auto 20px;
+}
+
 
 .a-question {
 }
