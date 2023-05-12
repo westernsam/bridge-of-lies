@@ -178,19 +178,6 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
 
     const bridge = buildBridge(truthPath, truths, lies)
-
-
-    function showWinLoss() {
-        switch (gamestate) {
-            case 'won' :
-                return <h3 >You win!!</h3>
-            case 'lost' :
-                return <h3 >You lose!</h3>
-            default:
-                return null
-        }
-    }
-
     return (
         <div className="App">
 
