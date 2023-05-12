@@ -12,7 +12,6 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
     const {
         seconds,
-        minutes,
         isRunning,
         resume,
         pause,
@@ -221,7 +220,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
             <div className={`circle money ${gamestate === "playing" ? null : (gamestate === "won") ? 'you-won' : 'you-lost' }`}>
                 <div className="box-value"><p>{title}</p></div>
-                <div className="box-value"><h2 >{seconds}</h2></div>
+                <div className="box-value"><h2 className={isRunning && seconds <= 10 ? 'last-10-seconds' : ''}>{seconds}</h2></div>
                 <div className="box-value"><h2 ><AnimatedNumber
                     value={money}
                     formatValue={v => `£ ${Number(v).toFixed(2)}`}

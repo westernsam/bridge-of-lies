@@ -88,7 +88,9 @@
 .a-lie-reveal {
   background-color: pink;
 }
-
+.last-10-seconds {
+  color: red;
+}
 .text {
   margin: auto;
 }
