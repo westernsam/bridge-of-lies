@@ -9,10 +9,13 @@ interface CircleProps {
     onLie: (row, column) => void;
     x: number
     y: number
+    gamestate: gamestate
 }
 
+type gamestate = 'playing' | 'won' | 'lost'
+
 type CircleStatus = 'start' | 'not_yet_revealed' | 'question_revealed' | 'result_revealed' | 'safety' | 'end'
-type CircleColour = 'not-opened' | 'a-truth' | 'a-lie' | 'a-question'
+type CircleColour = 'not-opened' | 'a-truth' | 'a-lie' | 'a-question' | 'a-lie-reveal' | 'a-truth-reveal'
 
 const defaultTruths = [
     'Edinborough',
@@ -52,7 +55,7 @@ const defaultLies = [
     'Crediton',
 ]
 
-const Step = ({isALie, question, status, onTruth, onLie, x, y}: CircleProps) => {
+const Step = ({isALie, question, status, onTruth, onLie, x, y, gamestate}: CircleProps) => {
     function getText() {
         switch (status[x][y]) {
             case 'start':
@@ -75,21 +78,25 @@ const Step = ({isALie, question, status, onTruth, onLie, x, y}: CircleProps) => 
             case 'result_revealed':
                 return isALie ? 'a-lie' : 'a-truth'
             case 'question_revealed':
-                return 'a-question'
+                if (gamestate === 'playing') return 'a-question'
+                else return isALie ? 'a-lie-reveal' : 'a-truth-reveal'
             default:
                 return 'not-opened'
         }
     }
 
     const clickStep = () => {
-        switch (status[x][y]) {
-            case 'start': {
-                onTruth(x, y)
-                break;
-            }
-            case 'question_revealed': {
-                isALie ? onLie(x, y) : onTruth(x, y)
-                break;
+        if (gamestate !== 'playing') return
+        else {
+            switch (status[x][y]) {
+                case 'start': {
+                    onTruth(x, y)
+                    break;
+                }
+                case 'question_revealed': {
+                    isALie ? onLie(x, y) : onTruth(x, y)
+                    break;
+                }
             }
         }
     }
@@ -104,7 +111,6 @@ interface BridgeProps {
     title: string
 }
 
-type gamestate = 'playing' | 'won' | 'lost'
 
 const Bridge = ({truths, lies, title}: BridgeProps) => {
 
@@ -130,24 +136,25 @@ const Bridge = ({truths, lies, title}: BridgeProps) => {
 
     function createStep(x: number, y: number, text: string, isALie: boolean) {
         return Step({
-            isALie: isALie,
+            gamestate,
+            isALie,
             question: text,
             status: rowStatus,
             onLie: (x, y) => {
                 setLiesSteppedOn(liesSteppedOn + 1)
-                if (liesSteppedOn === 2) {
+
+                const newRowState = [...rowStatus.map(r => [...r])]
+                if (newRowState[x][y] === 'question_revealed') {
+                    newRowState[x][y] = 'result_revealed'
+                }
+
+                setState(newRowState)
+
+                if (liesSteppedOn !== 2) {
+                    setMoney(money / 2)
+                } else {
                     setMoney(0)
                     setGamestate('lost')
-                }
-                else {
-
-                    setMoney(money / 2)
-                    const newRowState = [...rowStatus.map(r => [...r])]
-                    if (newRowState[x][y] === 'question_revealed') {
-                        newRowState[x][y] = 'result_revealed'
-                    }
-
-                    setState(newRowState)
                 }
             },
             onTruth: onTruth,
@@ -166,7 +173,7 @@ const Bridge = ({truths, lies, title}: BridgeProps) => {
             newRowState[row][column] = 'result_revealed'
         }
 
-        if (row ===9) {
+        if (row === 9) {
             setGamestate('won')
         } else {
 
@@ -278,16 +285,19 @@ const Bridge = ({truths, lies, title}: BridgeProps) => {
 
     function showWinLoss() {
         switch (gamestate) {
-            case 'won' : return <h1>You win {money}</h1>
-            case 'lost' : return  <h1>You lose !</h1>
-            default: return null
+            case 'won' :
+                return <h1>You win {money}</h1>
+            case 'lost' :
+                return <h1>You lose !</h1>
+            default:
+                return null
         }
     }
 
     return (
         <div className="App">
             <div>
-            <h1>Bridge of lies: {title}</h1>
+                <h1>Bridge of lies: {title}</h1>
                 <div className="square money"><h2>£ {money}</h2></div>
                 {showWinLoss()}
             </div>

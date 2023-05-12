@@ -75,6 +75,12 @@
 .a-lie {
   background-color: red;
 }
+.a-truth-reveal {
+  background-color: lightgreen;
+}
+.a-lie-reveal {
+  background-color: pink;
+}
 
 .text {
   margin: auto;
