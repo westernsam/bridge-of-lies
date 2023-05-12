@@ -124,10 +124,12 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             else return (curr < 1) ? 0 : Math.random() > 0.5 ? 0 : -1
         }
 
-        var currentCol = leftOrRight(0, 0, 1)
+        var currentCol = 0
 
-        function truthOrLieRow(row, numColumns) {
-            const all = [...Array(numColumns).keys()]
+        function truthOrLieRow(row, numColumns, indexBase = 0) {
+            currentCol = currentCol + leftOrRight(row, currentCol, numColumns - 1)
+
+            const all = [...Array(numColumns).keys()].map(i => i+indexBase)
             const truthY = currentCol;
             all.splice(truthY, 1)
 
@@ -156,8 +158,6 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             truths--
             restOfElements.splice(truthY, 0, true)
 
-            currentCol = currentCol + leftOrRight(row, currentCol, numColumns - 1)
-
             return restOfElements
         }
 
@@ -167,7 +167,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             truthOrLieRow(2, 3),
             truthOrLieRow(3, 4),
             truthOrLieRow(4, 5),
-            [false, ...truthOrLieRow(5, 4), false],
+            [false, ...truthOrLieRow(5, 4, 1), false],
             truthOrLieRow(6, 5),
             truthOrLieRow(7, 4),
             truthOrLieRow(8, 3),
