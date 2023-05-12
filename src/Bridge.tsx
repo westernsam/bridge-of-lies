@@ -183,9 +183,9 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
     function showWinLoss() {
         switch (gamestate) {
             case 'won' :
-                return <h1>You win !!</h1>
+                return <h3 >You win!!</h3>
             case 'lost' :
-                return <h1>You lose !</h1>
+                return <h3 >You lose!</h3>
             default:
                 return null
         }
@@ -193,16 +193,15 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
     return (
         <div className="App">
-            <div>
-                <h1>Bridge of lies: {title}</h1>
-                {showWinLoss()}
-            </div>
-            <div className="circle money">
-                <h2><AnimatedNumber
+
+            <div className={`circle money ${gamestate === "playing" ? null : (gamestate === "won") ? 'you-won' : 'you-lost' }`}>
+                <p>{title}</p>
+                <h2 className="money-value"><AnimatedNumber
                     value={money}
                     formatValue={v => `£ ${Number(v).toFixed(2)}`}
                     duration={500}
-                /></h2>
+                />
+                </h2>
             </div>
 
             {
