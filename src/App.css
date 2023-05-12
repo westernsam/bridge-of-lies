@@ -48,9 +48,9 @@
 .money {
   justify-content: center;
   margin: auto 25% 0 auto;
-  width: 100px;
+  width: 200px;
   height: 100px;
-  border-radius: 25%;
+  border-radius: 10%;
   border-style: dashed;
   position: sticky;
   top: 20px;

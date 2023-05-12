@@ -197,10 +197,6 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                 <h1>Bridge of lies: {title}</h1>
                 {showWinLoss()}
             </div>
-
-            {
-                bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
-            }
             <div className="circle money">
                 <h2><AnimatedNumber
                     value={money}
@@ -208,6 +204,11 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                     duration={500}
                 /></h2>
             </div>
+
+            {
+                bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
+            }
+
 
         </div>
     );
