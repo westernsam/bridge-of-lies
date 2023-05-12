@@ -70,26 +70,37 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             newRowState[row][column] = 'result_revealed'
         }
 
-        if (row === 9) {
-            setGamestate('won')
+        if (newRowState[row][column] === 'safety_opened') {
+            const revealedCoordinates = rowStatus.flatMap((row, x) => row.flatMap((c, y) => c === 'question_revealed' ? [[x, y]] : []));
+            const revealedLies = revealedCoordinates.filter(coords=> !truthPath[coords[0]][coords[1]])
+            const lieCoordinates =revealedLies[Math.floor(Math.random() * revealedLies.length)]
+            newRowState[lieCoordinates[0]][lieCoordinates[1]] = 'safety_revealed'
+
         } else {
+            if (row === 9) {
+                setGamestate('won')
+            } else {
+                function setIfPresent(x, y) {
+                    if (x > 0 && x < newRowState.length && y >= 0 && y < newRowState[x].length) {
+                        if (newRowState[x][y] === 'not_yet_revealed')
+                            newRowState[x][y] = 'question_revealed'
 
+                        if (newRowState[x][y] === 'safety')
+                            newRowState[x][y] = 'safety_opened'
+                    }
+                }
 
-            function setIfPresent(x, y) {
-                if (x > 0 && x < newRowState.length && y >= 0 && y < newRowState[x].length && newRowState[x][y] === 'not_yet_revealed')
-                    newRowState[x][y] = 'question_revealed'
+                function columnOffset(row1: number) {
+                    return row1 > 5 ? -1 : 0;
+                }
+
+                setIfPresent(row - 1, column - 1 + (row - 1 < 5 ? 0 : 1))
+                setIfPresent(row - 1, column + (row - 1 < 5 ? 0 : 1))
+                setIfPresent(row, column - 1)
+                setIfPresent(row, column + 1)
+                setIfPresent(row + 1, column + columnOffset(row + 1))
+                setIfPresent(row + 1, column + 1 + columnOffset(row + 1))
             }
-
-            function columnOffset(row1: number) {
-                return row1 > 5 ? -1 : 0;
-            }
-
-            setIfPresent(row - 1, column - 1 + (row - 1 < 5 ? 0 : 1))
-            setIfPresent(row - 1, column + (row - 1 < 5 ? 0 : 1))
-            setIfPresent(row, column - 1)
-            setIfPresent(row, column + 1)
-            setIfPresent(row + 1, column + columnOffset(row + 1))
-            setIfPresent(row + 1, column + 1 + columnOffset(row + 1))
         }
         setState(newRowState)
     }
@@ -134,7 +145,10 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             all.splice(truthY, 1)
 
             const restOfElements = all.map(c => {
-                if (row === 9) {
+                if (row === 1) {
+                    lies--
+                    return false
+                } else if (row === 9) {
                     lies--
                     return false
                 } else if (lies === 1) {

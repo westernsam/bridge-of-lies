@@ -72,6 +72,9 @@
 .not-opened {
   background-color: gray;
 }
+.safety-opened {
+  background-color: lightgrey;
+}
 .a-truth {
   background-color: green;
 }
