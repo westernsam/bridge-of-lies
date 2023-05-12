@@ -71,9 +71,10 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         }
 
         if (newRowState[row][column] === 'safety_opened') {
+            newRowState[row][column] = 'safety_used'
             const revealedCoordinates = rowStatus.flatMap((row, x) => row.flatMap((c, y) => c === 'question_revealed' ? [[x, y]] : []));
             const revealedLies = revealedCoordinates.filter(coords=> !truthPath[coords[0]][coords[1]])
-            const lieCoordinates =revealedLies[Math.floor(Math.random() * revealedLies.length)]
+            const lieCoordinates = revealedLies[Math.floor(Math.random() * revealedLies.length)]
             newRowState[lieCoordinates[0]][lieCoordinates[1]] = 'safety_revealed'
 
         } else {
