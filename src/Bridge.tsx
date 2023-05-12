@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {CircleStatus, GameState, Step} from "./Step";
-
+import AnimatedNumber from "animated-number-react";
 
 interface BridgeProps {
     truths: string[]
@@ -195,7 +195,13 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                 <h1>Bridge of lies: {title}</h1>
                 {showWinLoss()}
             </div>
-            <div className="square money"><h2>£ {money}</h2></div>
+            <div className="square money">
+                <h2><AnimatedNumber
+                    value={money}
+                    formatValue={v => `£ ${Number(v).toFixed(2)}`}
+                    duration={500}
+                /></h2>
+            </div>
             {
                 bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
             }
