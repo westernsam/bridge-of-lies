@@ -35,27 +35,29 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             isALie,
             question: text,
             status: rowStatus,
-            onLie: (x, y) => {
-                setLiesSteppedOn(liesSteppedOn + 1)
-
-                const newRowState = [...rowStatus.map(r => [...r])]
-                if (newRowState[x][y] === 'question_revealed') {
-                    newRowState[x][y] = 'result_revealed'
-                }
-
-                setState(newRowState)
-
-                if (liesSteppedOn !== 2) {
-                    setMoney(money / 2)
-                } else {
-                    setMoney(0)
-                    setGamestate('lost')
-                }
-            },
-            onTruth: onTruth,
+            onLie,
+            onTruth,
             x,
             y
         });
+    }
+
+    const onLie = (x, y) => {
+        setLiesSteppedOn(liesSteppedOn + 1)
+
+        const newRowState = [...rowStatus.map(r => [...r])]
+        if (newRowState[x][y] === 'question_revealed') {
+            newRowState[x][y] = 'result_revealed'
+        }
+
+        setState(newRowState)
+
+        if (liesSteppedOn !== 2) {
+            setMoney(money / 2)
+        } else {
+            setMoney(0)
+            setGamestate('lost')
+        }
     }
 
     const onTruth = (row, column) => {
@@ -181,7 +183,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
     function showWinLoss() {
         switch (gamestate) {
             case 'won' :
-                return <h1>You win {money}</h1>
+                return <h1>You win !!</h1>
             case 'lost' :
                 return <h1>You lose !</h1>
             default:
@@ -195,16 +197,17 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                 <h1>Bridge of lies: {title}</h1>
                 {showWinLoss()}
             </div>
-            <div className="square money">
+
+            {
+                bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
+            }
+            <div className="circle money">
                 <h2><AnimatedNumber
                     value={money}
                     formatValue={v => `£ ${Number(v).toFixed(2)}`}
                     duration={500}
                 /></h2>
             </div>
-            {
-                bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
-            }
 
         </div>
     );

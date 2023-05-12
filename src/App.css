@@ -37,31 +37,24 @@
   }
 }
 
-.money {
-
-}
-
-.square {
-  display: flex;
-  width: 100px;
-  height: 100px;
-}
-
 .circle {
   display: flex;
   width: 100px;
   height: 100px;
   border-radius: 50%;
   border-style: dashed;
-
 }
 
 .money {
   justify-content: center;
-  border-style: ridge;
-  margin: auto auto 20px;
+  margin: auto 25% 0 auto;
+  width: 100px;
+  height: 100px;
+  border-radius: 25%;
+  border-style: dashed;
+  position: sticky;
+  top: 20px;
 }
-
 
 .a-question {
 }
