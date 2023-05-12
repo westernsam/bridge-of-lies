@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {CircleStatus, GameState, Step} from "./Step";
 import AnimatedNumber from "animated-number-react";
+import { useTimer } from 'react-timer-hook';
 
 interface BridgeProps {
     truths: string[]
@@ -8,6 +9,15 @@ interface BridgeProps {
     title: string
 }
 export const Bridge = ({truths, lies, title}: BridgeProps) => {
+
+    const {
+        seconds,
+        minutes,
+        isRunning,
+        resume,
+        pause,
+        restart,
+    } = useTimer({ expiryTimestamp:new Date(), autoStart:false, onExpire: () => setGamestate("lost") });
 
     const [money, setMoney] = useState<number>(0)
     const [liesSteppedOn, setLiesSteppedOn] = useState<number>(0)
@@ -48,6 +58,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         const newRowState = [...rowStatus.map(r => [...r])]
         if (newRowState[x][y] === 'question_revealed') {
             newRowState[x][y] = 'result_revealed'
+            if (!isRunning) resume()
         }
 
         setState(newRowState)
@@ -57,20 +68,29 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         } else {
             setMoney(0)
             setGamestate('lost')
+            pause()
         }
     }
 
     const onTruth = (row, column) => {
+        if (row === 0) {
+            const now = new Date()
+            now.setTime(now.getTime() + 60 * 1000)
+            restart(now)
+        }
         const newRowState = [...rowStatus.map(r => [...r])]
 
-        if (rowStatus[row][column] === 'question_revealed')
+        if (rowStatus[row][column] === 'question_revealed') {
+            if (!isRunning) resume()
             setMoney(money + 100)
+        }
 
         if (newRowState[row][column] === 'question_revealed') {
             newRowState[row][column] = 'result_revealed'
         }
 
         if (newRowState[row][column] === 'safety_opened') {
+            pause()
             newRowState[row][column] = 'safety_used'
             const revealedCoordinates = rowStatus.flatMap((row, x) => row.flatMap((c, y) => c === 'question_revealed' ? [[x, y]] : []));
             const revealedLies = revealedCoordinates.filter(coords=> !truthPath[coords[0]][coords[1]])
@@ -81,14 +101,16 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         } else {
             if (row === 9) {
                 setGamestate('won')
+                pause()
             } else {
                 function setIfPresent(x, y) {
                     if (x > 0 && x < newRowState.length && y >= 0 && y < newRowState[x].length) {
                         if (newRowState[x][y] === 'not_yet_revealed')
                             newRowState[x][y] = 'question_revealed'
 
-                        if (newRowState[x][y] === 'safety')
+                        if (newRowState[x][y] === 'safety') {
                             newRowState[x][y] = 'safety_opened'
+                        }
                     }
                 }
 
@@ -198,20 +220,21 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         <div className="App">
 
             <div className={`circle money ${gamestate === "playing" ? null : (gamestate === "won") ? 'you-won' : 'you-lost' }`}>
-                <p>{title}</p>
-                <h2 className="money-value"><AnimatedNumber
+                <div className="box-value"><p>{title}</p></div>
+                <div className="box-value"><h2 >{seconds}</h2></div>
+                <div className="box-value"><h2 ><AnimatedNumber
                     value={money}
                     formatValue={v => `£ ${Number(v).toFixed(2)}`}
                     duration={500}
                 />
                 </h2>
+                </div>
+
             </div>
 
             {
                 bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
             }
-
-
         </div>
     );
 }

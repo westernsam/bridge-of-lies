@@ -48,15 +48,16 @@
 .money {
   justify-content: center;
   margin: auto 80% 0 10px;
-  width: 200px;
+  width: 250px;
   height: 150px;
   border-radius: 10%;
   border-style: dashed;
   position: sticky;
   top: 20px;
 }
-.money-value {
+.box-value {
   padding-right: 10px;
+  padding-left: 10px;
 }
 
 .you-won {
