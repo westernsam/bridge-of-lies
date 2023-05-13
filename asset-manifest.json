@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/bridge-of-lies/static/css/main.7b6f5386.css",
+    "main.css": "/bridge-of-lies/static/css/main.b9b761ea.css",
     "main.js": "/bridge-of-lies/static/js/main.e135e988.js",
     "static/js/787.33e34c9c.chunk.js": "/bridge-of-lies/static/js/787.33e34c9c.chunk.js",
     "index.html": "/bridge-of-lies/index.html",
-    "main.7b6f5386.css.map": "/bridge-of-lies/static/css/main.7b6f5386.css.map",
+    "main.b9b761ea.css.map": "/bridge-of-lies/static/css/main.b9b761ea.css.map",
     "main.e135e988.js.map": "/bridge-of-lies/static/js/main.e135e988.js.map",
     "787.33e34c9c.chunk.js.map": "/bridge-of-lies/static/js/787.33e34c9c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.7b6f5386.css",
+    "static/css/main.b9b761ea.css",
     "static/js/main.e135e988.js"
   ]
 }
