@@ -1,14 +1,37 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {CircleStatus, GameState, Step} from "./Step";
 import AnimatedNumber from "animated-number-react";
-import { useTimer } from 'react-timer-hook';
+import {useTimer} from 'react-timer-hook';
 
 interface BridgeProps {
     truths: string[]
     lies: string[]
     title: string
 }
+
+interface Link {
+    id: string;
+    shortUrl: string
+    title: string
+    slashtag: string
+}
+
 export const Bridge = ({truths, lies, title}: BridgeProps) => {
+    const [popular, setPopular] = useState<Link[]>([])
+
+    useEffect(() => {
+            const options = {
+                method: 'GET',
+                headers: {accept: 'application/json', apikey: 'f13772a8abbf4e7082c424d647c3c1c4'}
+            };
+
+            fetch('https://api.rebrandly.com/v1/links?orderBy=clicks&orderDir=desc&limit=10', options)
+                .then(response => response.json())
+                .then(response => setPopular(response))
+                .catch(err => console.error(err));
+        },
+        []
+    )
 
     const {
         seconds,
@@ -16,7 +39,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         resume,
         pause,
         restart,
-    } = useTimer({ expiryTimestamp:new Date(), autoStart:false, onExpire: () => setGamestate("lost") });
+    } = useTimer({expiryTimestamp: new Date(), autoStart: false, onExpire: () => setGamestate("lost")});
 
     const [money, setMoney] = useState<number>(0)
     const [liesSteppedOn, setLiesSteppedOn] = useState<number>(0)
@@ -93,7 +116,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             pause()
             newRowState[row][column] = 'safety_used'
             const revealedCoordinates = rowStatus.flatMap((row, x) => row.flatMap((c, y) => c === 'question_revealed' ? [[x, y]] : []));
-            const revealedLies = revealedCoordinates.filter(coords=> !truthPath[coords[0]][coords[1]])
+            const revealedLies = revealedCoordinates.filter(coords => !truthPath[coords[0]][coords[1]])
             const lieCoordinates = revealedLies[Math.floor(Math.random() * revealedLies.length)]
             if (lieCoordinates)
                 newRowState[lieCoordinates[0]][lieCoordinates[1]] = 'safety_revealed'
@@ -164,7 +187,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         function truthOrLieRow(row, numColumns, indexBase = 0) {
             currentCol = currentCol + leftOrRight(row, currentCol, numColumns - 1)
 
-            const all = [...Array(numColumns).keys()].map(i => i+indexBase)
+            const all = [...Array(numColumns).keys()].map(i => i + indexBase)
             const truthY = currentCol;
             all.splice(truthY, 1)
 
@@ -218,11 +241,22 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
     const bridge = buildBridge(truthPath, truths, lies)
     return (
         <div className="App">
-
-            <div className={`circle money ${gamestate === "playing" || gamestate=== 'not_started' ? null : (gamestate === "won") ? 'you-won' : 'you-lost' }`}>
+            <div className="links">
+                <div className="box-value">
+                    <h2>Popular</h2>
+                    <ul>
+                        {
+                            popular.map(link => <li key={link.id}><a href={`https://${link.shortUrl}`}>{link.title}</a></li>)
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div
+                className={` money ${gamestate === "playing" || gamestate === 'not_started' ? null : (gamestate === "won") ? 'you-won' : 'you-lost'}`}>
                 <div className="box-value"><p>{title}</p></div>
-                <div className="box-value"><h2 className={gamestate === 'playing' && seconds <= 10 ? 'last-10-seconds' : ''}>{seconds}</h2></div>
-                <div className="box-value"><h2 ><AnimatedNumber
+                <div className="box-value"><h2
+                    className={gamestate === 'playing' && seconds <= 10 ? 'last-10-seconds' : ''}>{seconds}</h2></div>
+                <div className="box-value"><h2><AnimatedNumber
                     value={money}
                     formatValue={v => `£ ${Number(v).toFixed(2)}`}
                     duration={500}

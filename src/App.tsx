@@ -50,10 +50,9 @@ function App() {
     const truths = !truthhex ? defaultTruths : atob(truthhex).toLocaleString().split(",");
     const lies = !lieshex ? defaultLies : atob(lieshex).toLocaleString().split(",");
     const title = !titlehex ? 'Stops on the route from Penzance to Aberdeen' : atob(titlehex).toLocaleString()
+    document.title = title;
 
-    return <div>
-        <Bridge truths={truths} lies={lies} title={title}/>
-    </div>
+    return <Bridge truths={truths} lies={lies} title={title}/>
 
 }
 
