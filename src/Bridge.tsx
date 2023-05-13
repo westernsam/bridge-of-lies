@@ -246,7 +246,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                     <h2>Popular</h2>
                     <ul>
                         {
-                            popular.map(link => <li key={link.id}><a href={`https://${link.shortUrl}`}>{link.title}</a></li>)
+                            popular.map(link => <li key={link.id}><a href={`https://${link.shortUrl}`}>{link.slashtag}</a></li>)
                         }
                     </ul>
                 </div>
