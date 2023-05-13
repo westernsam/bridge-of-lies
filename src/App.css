@@ -46,19 +46,22 @@
 }
 
 .links {
+  float: right;
   justify-content: center;
-  margin: auto 80% 0 10px;
-  width: 250px;
-  height: 150px;
+  margin: auto 5% 0 10px;
+  width: 30%;
+
   border-radius: 10%;
   border-style: dashed;
+  position: relative;
+  top: 20px;
 }
 
 .money {
   justify-content: center;
   margin: auto 80% 0 10px;
-  width: 250px;
-  height: 150px;
+  width: 30%;
+
   border-radius: 10%;
   border-style: dashed;
   position: sticky;
