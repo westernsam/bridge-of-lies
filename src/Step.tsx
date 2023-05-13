@@ -9,7 +9,7 @@ interface CircleProps {
     gamestate: GameState
 }
 
-export type GameState = 'playing' | 'won' | 'lost'
+export type GameState = 'not_started' | 'playing' | 'won' | 'lost'
 
 export type CircleStatus = 'start' | 'not_yet_revealed' | 'question_revealed' | 'result_revealed' | 'safety_revealed' | 'safety' | 'safety_opened' | 'safety_used' | 'end'
 export type CircleColour = 'not-opened' | 'a-truth' | 'a-lie' | 'a-question' | 'a-lie-reveal' | 'a-truth-reveal' | 'safety-opened'
@@ -54,7 +54,7 @@ export const Step = ({isALie, question, status, onTruth, onLie, x, y, gamestate}
     }
 
     const clickStep = () => {
-        if (gamestate !== 'playing') return
+        if (gamestate !== 'playing' && gamestate !== 'not_started') return
         else {
             switch (status[x][y]) {
                 case 'start': {

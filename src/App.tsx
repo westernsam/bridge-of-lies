@@ -41,7 +41,6 @@ const defaultLies = [
 ]
 
 
-
 function App() {
     const params = new URLSearchParams(window.location.search) // id=123
     const truthhex = params.get('truths')
@@ -52,7 +51,9 @@ function App() {
     const lies = !lieshex ? defaultLies : atob(lieshex).toLocaleString().split(",");
     const title = !titlehex ? 'Stops on the route from Penzance to Aberdeen' : atob(titlehex).toLocaleString()
 
-    return Bridge({truths, lies, title})
+    return <div>
+        <Bridge truths={truths} lies={lies} title={title}/>
+    </div>
 
 }
 

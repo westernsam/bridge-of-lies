@@ -20,7 +20,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
     const [money, setMoney] = useState<number>(0)
     const [liesSteppedOn, setLiesSteppedOn] = useState<number>(0)
-    const [gamestate, setGamestate] = useState<GameState>('playing')
+    const [gamestate, setGamestate] = useState<GameState>('not_started')
 
     const [rowStatus, setState] = useState<CircleStatus[][]>([
         ['start'],
@@ -74,8 +74,9 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
     const onTruth = (row, column) => {
         if (row === 0) {
             const now = new Date()
-            now.setTime(now.getTime() + 60 * 1000)
+            now.setTime(now.getTime() + 59 * 1000)
             restart(now)
+            setGamestate('playing')
         }
         const newRowState = [...rowStatus.map(r => [...r])]
 
@@ -218,9 +219,9 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
     return (
         <div className="App">
 
-            <div className={`circle money ${gamestate === "playing" ? null : (gamestate === "won") ? 'you-won' : 'you-lost' }`}>
+            <div className={`circle money ${gamestate === "playing" || gamestate=== 'not_started' ? null : (gamestate === "won") ? 'you-won' : 'you-lost' }`}>
                 <div className="box-value"><p>{title}</p></div>
-                <div className="box-value"><h2 className={isRunning && seconds <= 10 ? 'last-10-seconds' : ''}>{seconds}</h2></div>
+                <div className="box-value"><h2 className={gamestate === 'playing' && seconds <= 10 ? 'last-10-seconds' : ''}>{seconds}</h2></div>
                 <div className="box-value"><h2 ><AnimatedNumber
                     value={money}
                     formatValue={v => `£ ${Number(v).toFixed(2)}`}
