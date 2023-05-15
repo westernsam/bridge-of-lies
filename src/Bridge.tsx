@@ -180,11 +180,14 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             switch (row) {
                 case 1 :
                 case 2 :
-                case 3 : return (curr > max) ? 0 : Math.random() > 0.5 ? 0 : 1
+                case 3 :
                 case 4 :
-                    return (curr >= max) ? -1 :  Math.random() > 0.5 ? 0 : -1
-                default:
+                    return Math.random() > 0.5 ? 0 : 1
+                case 5 :
                     return (curr === 0) ? 0 : (curr >= max) ? -1 : Math.random() > 0.5 ? 0 : -1
+                    // return (curr >= max) ? -1 :  Math.random() > 0.5 ? 0 : -1
+                default:
+                    return (curr === 0) ? 0 : (curr > max) ? -1 : Math.random() > 0.5 ? 0 : -1
             }
         }
 
@@ -192,6 +195,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
         function truthOrLieRow(row, numColumns, indexBase = 0) {
             currentCol = currentCol + leftOrRight(row, currentCol, numColumns - 1)
+
 
             const all = [...Array(numColumns).keys()].map(i => i + indexBase)
             const truthY = currentCol;
@@ -273,6 +277,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             </div>
 
             {
+
                 bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
             }
         </div>
