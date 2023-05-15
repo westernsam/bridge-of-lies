@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {CircleStatus, GameState, Step} from "./Step";
 import AnimatedNumber from "animated-number-react";
 import {useTimer} from 'react-timer-hook';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 interface BridgeProps {
     truths: string[]
@@ -18,6 +19,7 @@ interface Link {
 
 export const Bridge = ({truths, lies, title}: BridgeProps) => {
     const [popular, setPopular] = useState<Link[]>([])
+    const [copied, setCopied] = useState<boolean>(false)
 
     useEffect(() => {
             const options = {
@@ -185,7 +187,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                     return Math.random() > 0.5 ? 0 : 1
                 case 5 :
                     return (curr === 0) ? 0 : (curr >= max) ? -1 : Math.random() > 0.5 ? 0 : -1
-                    // return (curr >= max) ? -1 :  Math.random() > 0.5 ? 0 : -1
+                // return (curr >= max) ? -1 :  Math.random() > 0.5 ? 0 : -1
                 default:
                     return (curr === 0) ? 0 : (curr > max) ? -1 : Math.random() > 0.5 ? 0 : -1
             }
@@ -249,6 +251,36 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
 
     const bridge = buildBridge(truthPath, truths, lies)
+
+    function getShareText(truthPath: boolean[][]) {
+        //⭕🔴✅🟢◯
+
+
+        function symbolFor(x: number, y: number) {
+            const rs = rowStatus[x][y]
+            if (rs === 'not_yet_revealed') return '◯'
+            else if (rs === 'question_revealed' || rs === 'safety_revealed') return !truthPath[x][y] ? '⭕' : '🟢'
+            else if (rs === 'result_revealed') return !truthPath[x][y] ? '🔴' : '✅'
+            else return '◯'
+        }
+
+        const bridge =
+`
+           ◯
+        ${symbolFor(1, 0)} ${symbolFor(1, 1)}
+      ${symbolFor(2, 0)} ${symbolFor(2, 1)} ${symbolFor(2, 2)}
+    ${symbolFor(3, 0)} ${symbolFor(3, 1)} ${symbolFor(3, 2)} ${symbolFor(3, 3)}   
+  ${symbolFor(4, 0)} ${symbolFor(4, 1)} ${symbolFor(4, 2)} ${symbolFor(4, 3)} ${symbolFor(4, 4)}    
+◯ ${symbolFor(5, 1)} ${symbolFor(5, 2)} ${symbolFor(5, 3)} ${symbolFor(5, 4)} ◯
+  ${symbolFor(6, 0)} ${symbolFor(6, 1)} ${symbolFor(6, 2)} ${symbolFor(6, 3)} ${symbolFor(6, 4)} 
+    ${symbolFor(7, 0)} ${symbolFor(7, 1)} ${symbolFor(7, 2)} ${symbolFor(7, 3)}                
+      ${symbolFor(8, 0)} ${symbolFor(8, 1)} ${symbolFor(8, 2)}
+        ${symbolFor(9, 0)} ${symbolFor(9, 1)}
+           ◯       
+`;
+        return `I won £${money}! with ${seconds} seconds to spare on the bridge:\n${title}\n${bridge}`
+    }
+
     return (
         <div className="App">
             <div className="links">
@@ -256,7 +288,8 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                     <h2>Popular</h2>
                     <ul className="no-bullets">
                         {
-                            popular.map(link => <li key={link.id}><a href={`https://${link.shortUrl}`}>{link.slashtag}</a></li>)
+                            popular.map(link => <li key={link.id}><a
+                                href={`https://${link.shortUrl}`}>{link.slashtag}</a></li>)
                         }
                     </ul>
                 </div>
@@ -272,6 +305,16 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                     duration={500}
                 />
                 </h2>
+                    {gamestate === 'won' &&
+                        <div>
+                        <CopyToClipboard text={getShareText(truthPath)} onCopy={() => setCopied(true)}>
+                            <button className="button1">Share</button>
+
+                        </CopyToClipboard>
+                        { copied ? <span>copied</span> : null }
+                        </div>
+                    }
+
                 </div>
 
             </div>
