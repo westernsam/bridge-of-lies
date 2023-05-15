@@ -177,9 +177,15 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         var lies = 10
 
         function leftOrRight(row, curr, max) {
-            if (row < 5) return (curr > max) ? 0 : Math.random() > 0.5 ? 0 : 1
-            else if (curr > max) return -1
-            else return (curr < 1) ? 0 : Math.random() > 0.5 ? 0 : -1
+            switch (row) {
+                case 1 :
+                case 2 :
+                case 3 : return (curr > max) ? 0 : Math.random() > 0.5 ? 0 : 1
+                case 4 :
+                    return (curr >= max) ? -1 :  Math.random() > 0.5 ? 0 : -1
+                default:
+                    return (curr === 0) ? 0 : (curr >= max) ? -1 : Math.random() > 0.5 ? 0 : -1
+            }
         }
 
         var currentCol = 0
