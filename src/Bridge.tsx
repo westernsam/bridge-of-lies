@@ -159,16 +159,16 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         let lie = -1
 
         return path.map((row, rowIndex) => {
-            return row.map((col, colIndex) => {
+            return row.map((isATruth, colIndex) => {
                 let text;
 
                 if (rowIndex === 0) text = 'start'
                 else if (rowIndex === 5 && colIndex === 0) text = 'safety'
                 else if (rowIndex === 5 && colIndex === 5) text = 'safety'
                 else if (rowIndex === 10) text = 'end'
-                else text = col ? truths[++truth] : lies[++lie]
+                else text = isATruth ? truths[++truth] : lies[++lie]
 
-                return createStep(rowIndex, colIndex, text, !col);
+                return createStep(rowIndex, colIndex, text, !isATruth);
             })
         })
     }
@@ -178,18 +178,24 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
         var truths = 22
         var lies = 10
 
-        function leftOrRight(row, curr, max) {
+        type PathDirection = -1 | 0 | 1
+
+        function leftOrRight(row, curr, max): PathDirection {
             switch (row) {
                 case 1 :
                 case 2 :
                 case 3 :
-                case 4 :
                     return Math.random() > 0.5 ? 0 : 1
-                case 5 :
-                    return (curr === 0) ? 0 : (curr >= max) ? -1 : Math.random() > 0.5 ? 0 : -1
-                // return (curr >= max) ? -1 :  Math.random() > 0.5 ? 0 : -1
+                case 4 :
+                    //special case
+                    switch (curr) {
+                        case 0: return 1
+                        case 4: return 0
+                        default: return Math.random() > 0.5 ? 0 : 1
+                    }
+
                 default:
-                    return (curr === 0) ? 0 : (curr > max) ? -1 : Math.random() > 0.5 ? 0 : -1
+                    return (curr === 0) ? 0 : (curr >= max) ? -1 : Math.random() > 0.5 ? 0 : -1
             }
         }
 
@@ -197,7 +203,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
         function truthOrLieRow(row, numColumns, indexBase = 0) {
             currentCol = currentCol + leftOrRight(row, currentCol, numColumns - 1)
-
+            if(!(currentCol >= 0 && currentCol < numColumns)) throw "error c=" + currentCol + " r=" + row + "numColumns=" + numColumns
 
             const all = [...Array(numColumns).keys()].map(i => i + indexBase)
             const truthY = currentCol;
@@ -234,7 +240,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             return restOfElements
         }
 
-        return [
+        let newVar = [
             [true],
             truthOrLieRow(1, 2),
             truthOrLieRow(2, 3),
@@ -247,6 +253,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
             truthOrLieRow(9, 2),
             [true]
         ];
+        return newVar;
     }
 
 
@@ -319,10 +326,12 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
 
             </div>
 
+            <div className="bottom">
             {
 
                 bridge.map((value, index) => <div className="row" key={`row-${index}`}> {value} </div>)
             }
+            </div>
         </div>
     );
 }

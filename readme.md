@@ -3,16 +3,8 @@ Bridge of lies
 
 todo:
 
-
-* always have a lie whne safety zone open?
-
 * add page to set question, truths and lies
-* share button
-
-* share button for result
- 
-* add reset button
-
-
-
-* integrate with chatGPT to get truths and lies
+    * integrate with chatGPT to get truths and lies
+* fix unsolvable bridge bug
+* fix UTF8 encoding
+* fix layout
