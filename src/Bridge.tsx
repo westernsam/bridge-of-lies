@@ -27,7 +27,7 @@ export const Bridge = ({truths, lies, title}: BridgeProps) => {
                 headers: {accept: 'application/json', apikey: 'f13772a8abbf4e7082c424d647c3c1c4'}
             };
 
-            fetch('https://api.rebrandly.com/v1/links?orderBy=clicks&orderDir=desc&limit=10', options)
+            fetch('https://api.rebrandly.com/v1/links?orderBy=clicks&orderDir=asc&limit=10', options)
                 .then(response => response.json())
                 .then(response => setPopular(response))
                 .catch(err => console.error(err));
